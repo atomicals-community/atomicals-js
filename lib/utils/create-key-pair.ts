@@ -1,9 +1,10 @@
-
 const bitcoin = require('bitcoinjs-lib');
-import ECPairFactory from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import { createMnemonicPhrase } from './create-mnemonic-phrase';
 bitcoin.initEccLib(ecc);
+
+import ECPairFactory from 'ecpair';
+import { defaultDerivedPath } from './address-helpers';
+import { createMnemonicPhrase } from './create-mnemonic-phrase';
 
 const ECPair = ECPairFactory(ecc);
 import BIP32Factory from 'bip32';
@@ -24,12 +25,16 @@ export interface KeyPair {
     privateKey?: string
 }
 
-export const createKeyPair = async (phrase: string = '', path = `m/44'/0'/0'/0/0`) : Promise<KeyPair> => {
+export const createKeyPair = async (
+    phrase: string = '',
+    path = defaultDerivedPath,
+    passphrase: string = ''
+) : Promise<KeyPair> => {
     if (!phrase || phrase === '') {
-        const phraseResult = await createMnemonicPhrase();
+        const phraseResult = createMnemonicPhrase();
         phrase = phraseResult.phrase;
     }
-    const seed = await bip39.mnemonicToSeed(phrase);
+    const seed = await bip39.mnemonicToSeed(phrase, passphrase);
     const rootKey = bip32.fromSeed(seed);
     const childNodePrimary = rootKey.derivePath(path);
     // const p2pkh = bitcoin.payments.p2pkh({ pubkey: childNodePrimary.publicKey });
@@ -74,13 +79,16 @@ export interface WalletRequestDefinition {
     path?: string | undefined
 }
 
-export const createPrimaryAndFundingImportedKeyPairs = async (phrase?: string | undefined, path?: string | undefined, n?: number) => {
-    let phraseResult: any = phrase;
-    if (!phraseResult) {
-        phraseResult = await createMnemonicPhrase();
-        phraseResult = phraseResult.phrase;
+export const createPrimaryAndFundingImportedKeyPairs = async (
+    phrase?: string | undefined,
+    path?: string | undefined,
+    passphrase?: string | undefined,
+    n?: number
+) => {
+    if (!phrase) {
+        phrase = createMnemonicPhrase().phrase;
     }
-    let pathUsed = `m/44'/0'/0'`;
+    let pathUsed = defaultDerivedPath.substring(0, 11);
     if (path) {
         pathUsed = path;
     }
@@ -88,23 +96,28 @@ export const createPrimaryAndFundingImportedKeyPairs = async (phrase?: string | 
 
     if (n) {
         for (let i = 2; i < n + 2; i++) {
-            imported[i+''] = await createKeyPair(phraseResult, `${pathUsed}/0/` + i)
+            imported[i+''] = await createKeyPair(phrase, `${pathUsed}/0/` + i, passphrase)
         }
     }
     return {
         wallet: {
-            phrase: phraseResult,
-            primary: await createKeyPair(phraseResult, `${pathUsed}/0/0`),
-            funding: await createKeyPair(phraseResult, `${pathUsed}/1/0`)
+            phrase,
+            passphrase,
+            primary: await createKeyPair(phrase, `${pathUsed}/0/0`, passphrase),
+            funding: await createKeyPair(phrase, `${pathUsed}/1/0`, passphrase)
         },
         imported
     }
 }
 
-export const createNKeyPairs = async (phrase, n = 1) => {
+export const createNKeyPairs = async (
+    phrase: string | undefined,
+    passphrase: string | undefined,
+    n = 1
+) => {
     const keypairs: any = [];
     for (let i = 0; i < n; i++) {
-        keypairs.push(await createKeyPair(phrase, `m/44'/0'/0'/0/${i}`));
+        keypairs.push(await createKeyPair(phrase, `${defaultDerivedPath.substring(0, 13)}/${i}`, passphrase));
     }
     return {
         phrase,
