@@ -54,17 +54,6 @@ export const validateWalletStorage = async (): Promise<IValidatedWalletInfo> => 
       throw new Error(`Wallet needs a funding address`);
     }
 
-    // Validate paths
-    /*if (wallet.primary.path !== `m/44'/0'/0'/0/0`) {
-      console.log(`Primary path must be m/44'/0'/0'/0/0`);
-      throw new Error(`Primary path must be m/44'/0'/0'/0/0`);
-    }
-
-    if (wallet.funding.path !== `m/44'/0'/0'/1/0`) {
-      console.log(`Funding path must be m/44'/0'/0'/1/0`);
-      throw new Error(`Funding path must be m/44'/0'/0'/1/0`);
-    }*/
-
     // Validate WIF
     if (!wallet.primary.WIF) {
       console.log(`Primary WIF not set`);
@@ -85,9 +74,9 @@ export const validateWalletStorage = async (): Promise<IValidatedWalletInfo> => 
       throw new Error(`Funding address not set`);
     }
 
-    const seed = await bip39.mnemonicToSeed(wallet.phrase);
+    const seed = await bip39.mnemonicToSeed(wallet.phrase, wallet.passphrase);
     const rootKey = bip32.fromSeed(seed);
-    const derivePathPrimary = wallet.primary.path; //`m/44'/0'/0'/0/0`;
+    const derivePathPrimary = wallet.primary.path;
 
     const childNodePrimary = rootKey.derivePath(derivePathPrimary);
 
@@ -99,7 +88,7 @@ export const validateWalletStorage = async (): Promise<IValidatedWalletInfo> => 
     if (!p2trPrimary.address || !p2trPrimary.output) {
         throw "error creating p2tr primary"
     }
-    const derivePathFunding = wallet.funding.path; //`m/44'/0'/0'/1/0`;
+    const derivePathFunding = wallet.funding.path;
     const childNodeFunding = rootKey.derivePath(derivePathFunding);
     const childNodeXOnlyPubkeyFunding = toXOnly(childNodeFunding.publicKey);
     const p2trFunding = bitcoin.payments.p2tr({
@@ -109,7 +98,6 @@ export const validateWalletStorage = async (): Promise<IValidatedWalletInfo> => 
     if (!p2trFunding.address || !p2trFunding.output) {
         throw "error creating p2tr funding"
     }
-   // const derivePathFunding = `m/44'/0'/0'/1/0`;
     //const childNodeFunding = rootKey.derivePath(derivePathFunding);
    // const { address } = bitcoin.payments.p2pkh({ pubkey: childNode.publicKey });
    //  const wif = childNodePrimary.toWIF();

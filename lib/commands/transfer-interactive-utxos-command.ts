@@ -35,7 +35,9 @@ export interface ISelectedUtxo {
   index: number;
   value: number;
   script: any;
-  atomicals: string[];
+  atomicals: {
+    [atomical_id: string]: string
+  };
 }
 
 
@@ -392,7 +394,7 @@ export class TransferInteractiveUtxosCommand implements CommandInterface {
     }
 
     if (!this.nofunding) {
-      // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN 
+      // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN
       if (tokenBalanceIn !== tokenBalanceOut) {
         throw 'Invalid input and output does not match for token. Developer Error.'
       }

@@ -1,9 +1,10 @@
-
 const bitcoin = require('bitcoinjs-lib');
-import ECPairFactory from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import { createMnemonicPhrase } from './create-mnemonic-phrase';
 bitcoin.initEccLib(ecc);
+
+import ECPairFactory from 'ecpair';
+import { defaultDerivedPath } from './address-helpers';
+import { createMnemonicPhrase } from './create-mnemonic-phrase';
 
 const ECPair = ECPairFactory(ecc);
 import BIP32Factory from 'bip32';
@@ -24,17 +25,22 @@ export interface KeyPair {
     privateKey?: string
 }
 
-export const createKeyPair = async (phrase: string = '', path = `m/44'/0'/0'/0/0`, isLegacy = false) : Promise<KeyPair> => {
+export const createKeyPair = async (
+    phrase: string = '',
+    path = defaultDerivedPath,
+    passphrase: string = '',
+    isLegacy = false
+) : Promise<KeyPair> => {
     if (!phrase || phrase === '') {
-        const phraseResult = await createMnemonicPhrase();
+        const phraseResult = createMnemonicPhrase();
         phrase = phraseResult.phrase;
     }
-    const seed = await bip39.mnemonicToSeed(phrase);
+    const seed = await bip39.mnemonicToSeed(phrase, passphrase);
     const rootKey = bip32.fromSeed(seed);
     const childNodePrimary = rootKey.derivePath(path);
     // const p2pkh = bitcoin.payments.p2pkh({ pubkey: childNodePrimary.publicKey });
     const childNodeXOnlyPubkeyPrimary = toXOnly(childNodePrimary.publicKey);
-    
+
     // Taproot adress
     const p2trPrimary = bitcoin.payments.p2tr({
         internalPubkey: childNodeXOnlyPubkeyPrimary,
@@ -49,13 +55,12 @@ export const createKeyPair = async (phrase: string = '', path = `m/44'/0'/0'/0/0
         network: NETWORK
     });
     // console.log('p2pkhPrimary', p2pkhPrimary, p2pkhPrimary.address.toString())
-    
+
     // Used for signing, since the output and address are using a tweaked key
     // We must tweak the signer in the same way.
-    /* const tweakedChildNodePrimary = childNodePrimary.tweak(
-        bitcoin.crypto.taggedHash('TapTweak', childNodeXOnlyPubkeyPrimary),
-    );
-    */
+    // const tweakedChildNodePrimary = childNodePrimary.tweak(
+    //   bitcoin.crypto.taggedHash('TapTweak', childNodeXOnlyPubkeyPrimary),
+    // );
 
     // Do a sanity check with the WIF serialized and then verify childNodePrimary is the same
     const wif = childNodePrimary.toWIF();
@@ -70,7 +75,7 @@ export const createKeyPair = async (phrase: string = '', path = `m/44'/0'/0'/0/0
         addressUsed = p2pkhPrimary.address;
     }
     return {
-        address: addressUsed, // p2trPrimary.address,
+        address: addressUsed,
         publicKey: childNodePrimary.publicKey.toString('hex'),
         publicKeyXOnly: childNodeXOnlyPubkeyPrimary.toString('hex'),
         path,
@@ -83,13 +88,16 @@ export interface WalletRequestDefinition {
     path?: string | undefined
 }
 
-export const createPrimaryAndFundingImportedKeyPairs = async (phrase?: string | undefined, path?: string | undefined, n?: number) => {
-    let phraseResult: any = phrase;
-    if (!phraseResult) {
-        phraseResult = await createMnemonicPhrase();
-        phraseResult = phraseResult.phrase;
+export const createPrimaryAndFundingImportedKeyPairs = async (
+    phrase?: string | undefined,
+    path?: string | undefined,
+    passphrase?: string | undefined,
+    n?: number
+) => {
+    if (!phrase) {
+        phrase = createMnemonicPhrase().phrase;
     }
-    let pathUsed = `m/44'/0'/0'`;
+    let pathUsed = defaultDerivedPath.substring(0, 11);
     if (path) {
         pathUsed = path;
     }
@@ -97,25 +105,30 @@ export const createPrimaryAndFundingImportedKeyPairs = async (phrase?: string | 
 
     if (n) {
         for (let i = 2; i < n + 2; i++) {
-            imported[i+''] = await createKeyPair(phraseResult, `${pathUsed}/0/` + i)
+            imported[i+''] = await createKeyPair(phrase, `${pathUsed}/0/` + i, passphrase)
         }
     }
     return {
         wallet: {
-            phrase: phraseResult,
+            phrase,
+            passphrase,
             // Use legacy p2pkh address format for auth type for now
-            auth: await createKeyPair(phraseResult, `${pathUsed}/2/0`, true),
-            primary: await createKeyPair(phraseResult, `${pathUsed}/0/0`),
-            funding: await createKeyPair(phraseResult, `${pathUsed}/1/0`)
+            auth: await createKeyPair(phrase, `${pathUsed}/2/0`, passphrase, true),
+            primary: await createKeyPair(phrase, `${pathUsed}/0/0`, passphrase, false),
+            funding: await createKeyPair(phrase, `${pathUsed}/1/0`, passphrase, false)
         },
         imported
     }
 }
 
-export const createNKeyPairs = async (phrase, n = 1) => {
+export const createNKeyPairs = async (
+    phrase: string | undefined,
+    passphrase: string | undefined,
+    n = 1
+) => {
     const keypairs: any = [];
     for (let i = 0; i < n; i++) {
-        keypairs.push(await createKeyPair(phrase, `m/44'/0'/0'/0/${i}`));
+        keypairs.push(await createKeyPair(phrase, `${defaultDerivedPath.substring(0, 13)}/${i}`, passphrase));
     }
     return {
         phrase,

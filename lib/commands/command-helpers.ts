@@ -258,7 +258,7 @@ export const prepareFilesDataAsObject = async (fields: string[], disableAutoncod
             const entrySplit = entry.split(',');
             const filePath = entrySplit[1];
             const alternateName = entrySplit[0]
-            const isInlineJson = filePath.endsWith('.json') ? true : false;
+            const isInlineJson = filePath.endsWith('.json');
             if (isInlineJson) {
                 const jsonFileContents = await jsonFileReader(filePath);
                 fieldDataObject[alternateName] = jsonFileContents;
