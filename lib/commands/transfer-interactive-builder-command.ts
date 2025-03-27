@@ -76,7 +76,7 @@ export class TransferInteractiveBuilderCommand implements CommandInterface {
     private forceSkipValidation?: boolean,
   ) {
     console.log(this.atomicalIdReceipt)
-  } 
+  }
   async run(): Promise<any> {
     if (this.atomicalIdReceipt && !isAtomicalId(this.atomicalIdReceipt)) {
       throw new Error('AtomicalId receipt is not a valid atomical id')
@@ -265,7 +265,7 @@ export class TransferInteractiveBuilderCommand implements CommandInterface {
     const utxosFiltered: any = [];
     for (const utxo of res.utxos) {
       // DO NOT Ignore the utxos which have atomicals in them
-      // This builder is meant to be flexible. 
+      // This builder is meant to be flexible.
       if (utxo.atomicals && utxo.atomicals.length) {
         // continue;
       }
@@ -321,7 +321,7 @@ export class TransferInteractiveBuilderCommand implements CommandInterface {
           const generalData = Buffer.from(splitted[1], 'utf8')
           const embed = bitcoin.payments.embed({ data: [generalData] });
           const paymentRecieptOpReturn = embed.output!
-  
+
           amountsToSend.push({
             opReturn: paymentRecieptOpReturn,
             value: 0
@@ -345,7 +345,7 @@ export class TransferInteractiveBuilderCommand implements CommandInterface {
             console.log('Invalid address')
             continue;
           }
-  
+
           amountsToSend.push({
             address: addressPart.address,
             value: valuePart
@@ -398,7 +398,7 @@ export class TransferInteractiveBuilderCommand implements CommandInterface {
           address: output.address,
         });
       }
-     
+
       tokenBalanceOut += output.value;
       tokenOutputsLength++;
     }
@@ -417,7 +417,7 @@ export class TransferInteractiveBuilderCommand implements CommandInterface {
     }
 
     if (!this.nofunding) {
-      // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN 
+      // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN
       if (tokenBalanceIn !== tokenBalanceOut) {
         throw 'Invalid input and output does not match for token. Developer Error.'
       }

@@ -443,12 +443,12 @@ export class TransferInteractiveFtCommand implements CommandInterface {
     }
 
     if (!this.nofunding) {
-      // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN 
+      // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN
       if (tokenBalanceIn !== tokenBalanceOut) {
         throw 'Invalid input and output does not match for token. Developer Error.'
       }
     }
-  
+
     const { expectedSatoshisDeposit } = calculateFTFundsRequired(transferOptions.selectedUtxos.length, transferOptions.outputs.length, satsbyte, 0);
     if (expectedSatoshisDeposit < 546) {
       throw 'Invalid expectedSatoshisDeposit. Developer Error.'

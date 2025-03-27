@@ -367,7 +367,7 @@ export class MergeInteractiveUtxosCommand implements CommandInterface {
       tokenOutputsLength++;
     }
 
-    // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN 
+    // TODO DETECT THAT THERE NEEDS TO BE CHANGE ADDED AND THEN
     if (tokenBalanceIn !== tokenBalanceOut) {
       throw 'Invalid input and output does not match for token. Developer Error.'
     }
