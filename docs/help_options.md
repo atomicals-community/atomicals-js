@@ -2,7 +2,7 @@
 
 This is first formating of `cat list_commands.txt | xargs -I CMD yarn cli CMD --help`
 
-*Note: The list of all commands is into [list_commands](./list_commands.txt)*
+*Note: The list of all commands is into [list_commands](./list_commands.txt), and not formatted options into [list_full_options](./list_full_options.txt)*
 
 ## server-version
 Usage: Atomicals CLI Utility server-version [options]
