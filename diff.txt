@@ -1,0 +1,52 @@
+3,4c3,4
+<   "version": "0.1.82",
+<   "description": "Atomicals JavaScript SDK and CLI",
+---
+>   "version": "0.1.81",
+>   "description": "Atomicals Javascript Library and CLI",
+7,16c7,8
+<   "exports": {
+<     ".": {
+<       "require": "./dist/index.js",
+<       "import": "./dist/index.js",
+<       "types": "./dist/index.d.ts"
+<     }
+<   },
+<   "bin": {
+<     "atomicals": "./dist/cli.js"
+<   },
+---
+>   "typings": "dist/index.d.ts",
+>   "type": "commonjs",
+25,34c17,19
+<   "files": [
+<     "dist/*"
+<   ],
+<   "keywords": [
+<     "bitcoin",
+<     "atomicals",
+<     "cli",
+<     "sdk",
+<     "blockchain"
+<   ],
+---
+>   "bin": {
+>     "atomicals": "./dist/cli.js"
+>   },
+39c24
+<   "author": "Atomicals Community",
+---
+>   "author": "",
+43a29,32
+>   "keywords": [
+>     "bitcoin",
+>     "atomicals"
+>   ],
+45d33
+<   "type": "commonjs",
+97a86,88
+>   "files": [
+>     "dist/*"
+>   ],
+103d93
+< 

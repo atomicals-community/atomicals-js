@@ -4,9 +4,15 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
+    "rootDir": "./lib",
     "strict": true,
     "noImplicitAny": false,
-    "resolveJsonModule" : true
-  }
+    "resolveJsonModule": true,
+    "preserveSymlinks": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  },
+  "include": ["lib"],
+  "exclude": ["node_modules", "dist", "test", "wallets", "templates"]
 }
 
