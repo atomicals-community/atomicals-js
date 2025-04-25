@@ -1,6 +1,6 @@
 {
   "name": "atomicals-js",
-  "version": "0.1.82",
+  "version": "0.1.84",
   "description": "Atomicals JavaScript SDK and CLI",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -100,4 +100,3 @@
     "test": "test"
   }
 }
-
